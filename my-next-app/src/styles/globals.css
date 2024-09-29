@@ -1,0 +1,25 @@
+:root {
+  --primary-color: #F5D700; 
+  --secondary-color: #0070f3; 
+  --background-color: #f5f5f5;
+  --text-color: #333;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background-color: #171717;
+    --text-color: #ededed;
+  }
+}
+
+body {
+  font-family: Roboto, sans-serif;
+  color: var(--text-color);
+  background-color: var(--background-color);
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
