@@ -3,24 +3,21 @@ import Link from "next/link";
 const ProductCard = ({ product }) => {
   return (
     <div className="product-card">
-    
       <Link href={`/product/${product.id}`}>
-  
         <div className="product-image-container">
-         <img src={product.images[0]} alt={product.title} />
+          <img src={product.images[0]} alt={product.title} />
         </div>
-       <h2>{product.title}</h2>
+        <h2>{product.title}</h2>
         <p className="product-price">${product.price.toFixed(2)}</p>
         <p className="product-category">{product.category}</p>
       </Link>
-  
       <style jsx>{`
         .product-card {
           background-color: #fff;
           border: 1px solid #e1e1e1;
           border-radius: 10px;
           box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-          padding: 40px; /* Increased padding */
+          padding: 40px; 
           text-align: center;
           cursor: pointer;
           transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -94,4 +91,3 @@ const ProductCard = ({ product }) => {
 };
 
 export default ProductCard;
-

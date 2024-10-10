@@ -1,19 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 import { fetchProducts } from '../api/api';
 import ProductList from '../components/ProductList';
 import SearchBar from '../components/SearchBar';
 import CategoryDropdown from '../components/CategoryDropdown';
 import SortDropdown from '../components/SortDropdown';
-import Image from 'next/image';
 
-/**
- * Product listing page component.
- * @param {Object} props - Component props.
- * @param {Array} props.initialProducts - Initial list of products.
- * @param {number} props.initialPage - Initial page number.
- * @returns {JSX.Element} The product listing page.
- */
 export default function ProductListing({ initialProducts, initialPage }) {
   const [products, setProducts] = useState(initialProducts || []);
   const [page, setPage] = useState(initialPage || 1);
@@ -21,16 +13,20 @@ export default function ProductListing({ initialProducts, initialPage }) {
   const [error, setError] = useState(null);
   const router = useRouter();
   const { search, category, sortBy, order } = router.query;
+  const lastVisible = useRef(null);
 
   useEffect(() => {
     const loadProducts = async () => {
       setLoading(true);
       setError(null);
       try {
-        const productData = await fetchProducts(page, search, category, sortBy, order);
-        setProducts(productData);
+        const productData = await fetchProducts(page, search, category, sortBy, order, lastVisible.current);
+        setProducts(productData.products);
+        lastVisible.current = productData.lastVisible;
+        console.log('Fetched Products:', productData.products);
       } catch (err) {
         setError("Failed to load products");
+        console.error('Error:', err);
       } finally {
         setLoading(false);
       }
@@ -38,27 +34,18 @@ export default function ProductListing({ initialProducts, initialPage }) {
     loadProducts();
   }, [page, search, category, sortBy, order]);
 
-  /**
-   * Handles the next page button click.
-   */
   const handleNextPage = () => {
     const nextPage = page + 1;
     setPage(nextPage);
     router.push(`/?page=${nextPage}`, undefined, { shallow: true });
   };
 
-  /**
-   * Handles the previous page button click.
-   */
   const handlePrevPage = () => {
     const prevPage = Math.max(page - 1, 1);
     setPage(prevPage);
     router.push(`/?page=${prevPage}`, undefined, { shallow: true });
   };
 
-  /**
-   * Resets the filters and navigates to the main page.
-   */
   const handleReset = () => {
     router.push('/');
   };
@@ -153,12 +140,7 @@ export default function ProductListing({ initialProducts, initialPage }) {
           transition: background-color 0.3s ease;
         }
 
-        .btn:disabled {
-          background-color: #ccc;
-          cursor: not-allowed;
-        }
-
-        .btn:hover:not(:disabled) {
+        .btn:hover {
           background-color: #005bb5;
         }
 
@@ -197,11 +179,6 @@ export default function ProductListing({ initialProducts, initialPage }) {
   );
 }
 
-/**
- * Fetches initial products and page number for server-side rendering.
- * @param {Object} context - Next.js context object.
- * @returns {Object} Props for the component.
- */
 export async function getServerSideProps(context) {
   try {
     const page = 1;
@@ -209,10 +186,9 @@ export async function getServerSideProps(context) {
     const category = context.query.category || '';
     const sortBy = context.query.sortBy || '';
     const order = context.query.order || '';
-    const products = await fetchProducts(page, search, category, sortBy, order);
-    return { props: { initialProducts: products, initialPage: page } };
+    const productsData = await fetchProducts(page, search, category, sortBy, order);
+    return { props: { initialProducts: productsData.products, initialPage: page, lastVisible: productsData.lastVisible } };
   } catch (error) {
     return { props: { error: "Products have failed to load, try again." } };
   }
 }
-

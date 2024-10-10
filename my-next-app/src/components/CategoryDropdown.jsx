@@ -1,8 +1,19 @@
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
+import { fetchCategories } from '../api/api';
 
 const CategoryDropdown = () => {
   const router = useRouter();
   const { category } = router.query;
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    const getCategories = async () => {
+      const categoriesData = await fetchCategories();
+      setCategories(categoriesData);
+    };
+    getCategories();
+  }, []);
 
   const handleCategoryChange = (e) => {
     router.push(`/?category=${e.target.value}`);
@@ -12,10 +23,9 @@ const CategoryDropdown = () => {
     <div className="category-dropdown">
       <select value={category || ''} onChange={handleCategoryChange} className="dropdown">
         <option value="">All Categories</option>
-        <option value="electronics">Electronics</option>
-        <option value="fashion">Fashion</option>
-        <option value="home">Home</option>
-        <option value="beauty">Beauty</option>
+        {categories.map((cat, index) => (
+          <option key={index} value={cat}>{cat}</option>
+        ))}
       </select>
       <style jsx>{`
         .category-dropdown {

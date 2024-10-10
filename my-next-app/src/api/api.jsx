@@ -1,30 +1,76 @@
+import { db } from '@/firebaseConfig';
+import { collection, getDocs, query, where, orderBy, limit, startAfter } from 'firebase/firestore';
 
-export const fetchProducts = async (page = 1, search = '', category = '', sortBy = '', order = '') => {
-  const response = await fetch(
-    `https://next-ecommerce-api.vercel.app/products?skip=${
-      (page - 1) * 20
-    }&limit=20&search=${search}&category=${category}&sortBy=${sortBy}&order=${order}`
-  );
+export const fetchProducts = async (page = 1, search = '', category = '', sortBy = '', order = 'asc', lastVisible = null) => {
+  try {
+    let q = query(collection(db, 'products'));
 
-  if (!response.ok) {
-    throw new Error("Failed to fetch products");
+    if (search) {
+      q = query(q, where('title', '>=', search), where('title', '<=', search + '\uf8ff'));
+    }
+
+    if (category) {
+      q = query(q, where('category', '==', category));
+    }
+
+    if (sortBy) {
+      q = query(q, orderBy(sortBy, order));
+    }
+
+    q = query(q, limit(20));
+
+    if (lastVisible) {
+      q = query(q, startAfter(lastVisible));
+    }
+
+    const querySnapshot = await getDocs(q);
+    const products = [];
+    querySnapshot.forEach((doc) => {
+      products.push({ ...doc.data(), id: doc.id });
+    });
+
+    const newLastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
+    console.log('Fetched Products:', products);
+
+    return { products, lastVisible: newLastVisible };
+  } catch (error) {
+    console.error('Error fetching products:', error);
+    throw error;
   }
-
-  const data = await response.json();
-
-  return data;
 };
+
 
 export const fetchProductById = async (id) => {
-  const response = await fetch(
-    `https://next-ecommerce-api.vercel.app/products/${id}`
-  );
+  const docRef = doc(db, 'products', id);
+  const docSnap = await getDocs(docRef);
 
-  if (!response.ok) {
-    throw new Error("Failed to fetch product");
+  if (!docSnap.exists()) {
+    throw new Error('Failed to fetch product');
   }
 
-  const data = await response.json();
-
-  return data;
+  return { ...docSnap.data(), id: docSnap.id };
 };
+
+export const fetchProductByKey = async (key) => {
+  const docRef = doc(db, 'products', key);
+  const docSnap = await getDoc(docRef);
+
+  if (!docSnap.exists()) {
+    throw new Error('Failed to fetch product');
+  }
+
+  return { ...docSnap.data(), id: docSnap.id };
+};
+
+export const fetchCategories = async () => {
+  const querySnapshot = await getDocs(collection(db, 'categories'));
+  let categories = [];
+  querySnapshot.forEach((doc) => {
+    if (doc.id === 'allCategories') {
+      categories = doc.data().categories;
+    }
+  });
+  return categories;
+};
+
+

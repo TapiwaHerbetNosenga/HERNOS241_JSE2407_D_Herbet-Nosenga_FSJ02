@@ -12,8 +12,8 @@ const SortDropdown = () => {
     <div className="sort-dropdown">
       <select value={sortBy || ''} onChange={handleSortChange} className="dropdown">
         <option value="">Sort By</option>
-        <option value="price-asc">Price: Low to High</option>
-        <option value="price-desc">Price: High to Low</option>
+        <option value="asc">Price: Low to High</option>
+        <option value="desc">Price: High to Low</option>
         <option value="rating">Rating</option>
       </select>
       <style jsx>{`
