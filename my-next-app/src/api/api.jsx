@@ -1,32 +1,15 @@
 import { db } from '@/firebaseConfig';
 import { collection, getDocs, query, where, orderBy, limit, startAfter, doc, getDoc, setDoc } from 'firebase/firestore';
 
-let lastVisible = null;
-
-export const fetchProducts = async (page = 1, search = '', category = '', sortBy = '', order = 'asc') => {
+export const fetchProducts = async (page = 1) => {
   try {
-    let q = query(collection(db, 'products'));
+    let q = query(collection(db, 'products'), limit(20));
 
-    if (search) {
-      q = query(q, where('title', '==', search));
-    }
-
-    if (category) {
-      q = query(q, where('category', '==', category));
-    }
-
-    if (sortBy) {
-      q = query(q, orderBy(sortBy, order));
-    }
-
-    /*if (page) {
-      q = query(q, orderBy(sortBy, order));
-    }*/
-
-    q = query(q, limit(20));
-
-    if (lastVisible) {
-      q = query(q, startAfter(lastVisible));
+    if (page > 1) {
+      const offset = (page - 1) * 20;
+      const tempSnapshot = await getDocs(query(collection(db, 'products'), limit(offset)));
+      const tempLastVisible = tempSnapshot.docs[tempSnapshot.docs.length - 1];
+      q = query(collection(db, 'products'), startAfter(tempLastVisible), limit(20));
     }
 
     const querySnapshot = await getDocs(q);
@@ -35,12 +18,89 @@ export const fetchProducts = async (page = 1, search = '', category = '', sortBy
       products.push({ ...doc.data(), id: doc.id });
     });
 
-    lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1] || null;
     console.log('Fetched Products:', products);
 
-    return { products, lastVisibleId: lastVisible ? lastVisible.id : null };
+    return { products };
   } catch (error) {
     console.error('Error fetching products:', error);
+    throw error;
+  }
+};
+
+export const fetchProductsBySearch = async (search, page = 1) => {
+  try {
+    let q = query(collection(db, 'products'),where('title', '==', search), limit(20));
+
+    if (page > 1) {
+      const offset = (page - 1) * 20;
+      const tempSnapshot = await getDocs(query(collection(db, 'products'), where('title', '>=', search), where('title', '<=', search + '\uf8ff'), limit(offset)));
+      const tempLastVisible = tempSnapshot.docs[tempSnapshot.docs.length - 1];
+      q = query(collection(db, 'products'), where('title', '>=', search), where('title', '<=', search + '\uf8ff'), startAfter(tempLastVisible), limit(20));
+    }
+
+    const querySnapshot = await getDocs(q);
+    const products = [];
+    querySnapshot.forEach((doc) => {
+      products.push({ ...doc.data(), id: doc.id });
+    });
+
+    console.log('Fetched Products by Search:', products);
+
+    return { products };
+  } catch (error) {
+    console.error('Error fetching products by search:', error);
+    throw error;
+  }
+};
+
+export const fetchProductsByCategory = async (category, page = 1) => {
+  try {
+    let q = query(collection(db, 'products'), where('category', '==', category), limit(20));
+
+    if (page > 1) {
+      const offset = (page - 1) * 20;
+      const tempSnapshot = await getDocs(query(collection(db, 'products'), where('category', '==', category), limit(offset)));
+      const tempLastVisible = tempSnapshot.docs[tempSnapshot.docs.length - 1];
+      q = query(collection(db, 'products'), where('category', '==', category), startAfter(tempLastVisible), limit(20));
+    }
+
+    const querySnapshot = await getDocs(q);
+    const products = [];
+    querySnapshot.forEach((doc) => {
+      products.push({ ...doc.data(), id: doc.id });
+    });
+
+    console.log('Fetched Products by Category:', products);
+
+    return { products };
+  } catch (error) {
+    console.error('Error fetching products by category:', error);
+    throw error;
+  }
+};
+
+export const fetchProductsBySort = async (page = 1) => {
+  try {
+    let q = query(collection(db, 'products'), orderBy('price', 'asc'), limit(20));
+
+    if (page > 1) {
+      const offset = (page - 1) * 20;
+      const tempSnapshot = await getDocs(query(collection(db, 'products'), orderBy('price', 'asc'), limit(offset)));
+      const tempLastVisible = tempSnapshot.docs[tempSnapshot.docs.length - 1];
+      q = query(collection(db, 'products'), orderBy('price', 'asc'), startAfter(tempLastVisible), limit(20));
+    }
+
+    const querySnapshot = await getDocs(q);
+    const products = [];
+    querySnapshot.forEach((doc) => {
+      products.push({ ...doc.data(), id: doc.id });
+    });
+
+    console.log('Fetched Products by Sort:', products);
+
+    return { products };
+  } catch (error) {
+    console.error('Error fetching products by sort:', error);
     throw error;
   }
 };
@@ -67,11 +127,8 @@ export const fetchCategories = async () => {
   return categories;
 };
 
-export const addReview = async () =>{
-
-
-await setDoc(doc(db, "reviews", "1" ), {
-  "name":"jon",
-})
-
-}
+export const addReview = async () => {
+  await setDoc(doc(db, "reviews", "1"), {
+    name: "jon"
+  });
+};

@@ -1,23 +1,8 @@
 import Head from 'next/head';
 import Image from 'next/image';
+import AddReview from '../../components/AddReview';
 import { fetchProductById } from '../../api/api';
 
-/**
- * Detailed product page component.
- * @param {Object} props - Component props.
- * @param {Object} props.product - Product details.
- * @param {string} props.product.title - Product title.
- * @param {string} props.product.description - Product description.
- * @param {number} props.product.price - Product price.
- * @param {string} props.product.category - Product category.
- * @param {Array} props.product.images - Product images.
- * @param {Array} props.product.tags - Product tags.
- * @param {number} props.product.rating - Product rating.
- * @param {number} props.product.stock - Product stock status.
- * @param {Array} props.product.reviews - Product reviews.
- * @param {string} props.error - Error message, if any.
- * @returns {JSX.Element} The detailed product page.
- */
 const DetailedProducts = ({ product, error }) => {
   if (error) return <div className="error">{error}</div>;
 
@@ -63,7 +48,7 @@ const DetailedProducts = ({ product, error }) => {
                 {sortedReviews.map((review) => (
                   <div key={`${review.reviewerEmail}-${review.date}`} className="review">
                     <p>
-                      <strong>{review.name}</strong> Date: {new Date(review.date).toLocaleDateString('en-US')}
+                      <strong>{review.reviewerName}</strong> Date: {new Date(review.date).toLocaleDateString('en-US')}
                     </p>
                     <p>Rated: {review.rating}/5</p>
                     <p>Comment: {review.comment}</p>
@@ -76,6 +61,8 @@ const DetailedProducts = ({ product, error }) => {
           </div>
         </div>
       </div>
+      <AddReview productId={product.id} />
+
       <style jsx>{`
         @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
 
@@ -199,13 +186,6 @@ const DetailedProducts = ({ product, error }) => {
   );
 };
 
-/**
- * Fetches product details for server-side rendering.
- * @param {Object} context - Next.js context object.
- * @param {Object} context.params - Route parameters.
- * @param {string} context.params.id - Product ID.
- * @returns {Object} Props for the component.
- */
 export async function getServerSideProps(context) {
   const { id } = context.params;
 

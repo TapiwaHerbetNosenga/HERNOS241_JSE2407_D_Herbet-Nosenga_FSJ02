@@ -1,11 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
-import { fetchProducts, addReview } from '../api/api';
+import { fetchProducts, fetchProductsBySearch, fetchProductsByCategory, fetchProductsBySort, addReview } from '../api/api';
 import ProductList from '../components/ProductList';
 import SearchBar from '../components/SearchBar';
 import CategoryDropdown from '../components/CategoryDropdown';
 import SortDropdown from '../components/SortDropdown';
-
 
 export default function ProductListing({ initialProducts = [], initialPage = 1, initialLastVisible = null }) {
   const [products, setProducts] = useState(initialProducts);
@@ -22,12 +21,17 @@ export default function ProductListing({ initialProducts = [], initialPage = 1, 
       setError(null);
       try {
         await addReview();
-        const productData = await fetchProducts(page, search, category, sortBy, order, lastVisible.current);
-        if (page === 1) {
-          setProducts(productData.products);
+        let productData;
+        if (search) {
+          productData = await fetchProductsBySearch(search, page);
+        } else if (category) {
+          productData = await fetchProductsByCategory(category, page);
+        } else if (sortBy) {
+          productData = await fetchProductsBySort(sortBy, order, page);
         } else {
-          setProducts((prev) => [...prev, ...productData.products]);
+          productData = await fetchProducts(page);
         }
+        setProducts(productData.products);
         lastVisible.current = productData.lastVisible;
         console.log('Fetched Products:', productData.products);
       } catch (err) {
@@ -85,6 +89,7 @@ export default function ProductListing({ initialProducts = [], initialPage = 1, 
           </div>
         </>
       )}
+   
       <style jsx>{`
         .container {
           max-width: 1200px;
@@ -181,7 +186,7 @@ export default function ProductListing({ initialProducts = [], initialPage = 1, 
           }
         }
       `}</style>
-    </div>
+  </div>
   );
 }
 
@@ -192,7 +197,16 @@ export async function getServerSideProps(context) {
     const category = context.query.category || '';
     const sortBy = context.query.sortBy || '';
     const order = context.query.order || '';
-    const productsData = await fetchProducts(page, search, category, sortBy, order);
+    let productsData;
+    if (search) {
+      productsData = await fetchProductsBySearch(search, page);
+    } else if (category) {
+      productsData = await fetchProductsByCategory(category, page);
+    } else if (sortBy) {
+      productsData = await fetchProductsBySort(sortBy, order, page);
+    } else {
+      productsData = await fetchProducts(page);
+    }
     return { props: { initialProducts: productsData.products, initialPage: page, initialLastVisible: productsData.lastVisible || null } };
   } catch (error) {
     return { props: { initialProducts: [], initialPage: 1, initialLastVisible: null, error: "Products have failed to load, try again." } };
