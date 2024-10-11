@@ -1,12 +1,19 @@
 import ProductCard from "./ProductCard";
 
 const ProductList = ({ products }) => {
+  const seenIds = new Set();
+
   return (
     <div className="product-grid">
       {products.length > 0 ? (
-        products.map((product) => (
-          <ProductCard key={product.id} product={product} />
-        ))
+        products.map((product) => {
+          if (seenIds.has(product.id)) {
+            console.warn(`Duplicate key found: ${product.id}`);
+          } else {
+            seenIds.add(product.id);
+          }
+          return <ProductCard key={product.id} product={product} />;
+        })
       ) : (
         <p>No products to display.</p>
       )}

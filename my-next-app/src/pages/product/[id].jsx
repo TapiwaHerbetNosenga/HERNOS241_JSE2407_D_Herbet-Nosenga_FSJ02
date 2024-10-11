@@ -61,7 +61,7 @@ const DetailedProducts = ({ product, error }) => {
             {sortedReviews.length > 0 ? (
               <div className="review-container">
                 {sortedReviews.map((review) => (
-                  <div key={review.id} className="review">
+                  <div key={`${review.reviewerEmail}-${review.date}`} className="review">
                     <p>
                       <strong>{review.name}</strong> Date: {new Date(review.date).toLocaleDateString('en-US')}
                     </p>

@@ -1,12 +1,14 @@
 import { db } from '@/firebaseConfig';
-import { collection, getDocs, query, where, orderBy, limit, startAfter } from 'firebase/firestore';
+import { collection, getDocs, query, where, orderBy, limit, startAfter, doc, getDoc, setDoc } from 'firebase/firestore';
 
-export const fetchProducts = async (page = 1, search = '', category = '', sortBy = '', order = 'asc', lastVisible = null) => {
+let lastVisible = null;
+
+export const fetchProducts = async (page = 1, search = '', category = '', sortBy = '', order = 'asc') => {
   try {
     let q = query(collection(db, 'products'));
 
     if (search) {
-      q = query(q, where('title', '>=', search), where('title', '<=', search + '\uf8ff'));
+      q = query(q, where('title', '==', search));
     }
 
     if (category) {
@@ -16,6 +18,10 @@ export const fetchProducts = async (page = 1, search = '', category = '', sortBy
     if (sortBy) {
       q = query(q, orderBy(sortBy, order));
     }
+
+    /*if (page) {
+      q = query(q, orderBy(sortBy, order));
+    }*/
 
     q = query(q, limit(20));
 
@@ -29,30 +35,18 @@ export const fetchProducts = async (page = 1, search = '', category = '', sortBy
       products.push({ ...doc.data(), id: doc.id });
     });
 
-    const newLastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
+    lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1] || null;
     console.log('Fetched Products:', products);
 
-    return { products, lastVisible: newLastVisible };
+    return { products, lastVisibleId: lastVisible ? lastVisible.id : null };
   } catch (error) {
     console.error('Error fetching products:', error);
     throw error;
   }
 };
 
-
 export const fetchProductById = async (id) => {
   const docRef = doc(db, 'products', id);
-  const docSnap = await getDocs(docRef);
-
-  if (!docSnap.exists()) {
-    throw new Error('Failed to fetch product');
-  }
-
-  return { ...docSnap.data(), id: docSnap.id };
-};
-
-export const fetchProductByKey = async (key) => {
-  const docRef = doc(db, 'products', key);
   const docSnap = await getDoc(docRef);
 
   if (!docSnap.exists()) {
@@ -73,4 +67,11 @@ export const fetchCategories = async () => {
   return categories;
 };
 
+export const addReview = async () =>{
 
+
+await setDoc(doc(db, "reviews", "1" ), {
+  "name":"jon",
+})
+
+}

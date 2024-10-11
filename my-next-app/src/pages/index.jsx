@@ -1,27 +1,33 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
-import { fetchProducts } from '../api/api';
+import { fetchProducts, addReview } from '../api/api';
 import ProductList from '../components/ProductList';
 import SearchBar from '../components/SearchBar';
 import CategoryDropdown from '../components/CategoryDropdown';
 import SortDropdown from '../components/SortDropdown';
 
-export default function ProductListing({ initialProducts, initialPage }) {
-  const [products, setProducts] = useState(initialProducts || []);
-  const [page, setPage] = useState(initialPage || 1);
+
+export default function ProductListing({ initialProducts = [], initialPage = 1, initialLastVisible = null }) {
+  const [products, setProducts] = useState(initialProducts);
+  const [page, setPage] = useState(initialPage);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const router = useRouter();
   const { search, category, sortBy, order } = router.query;
-  const lastVisible = useRef(null);
+  const lastVisible = useRef(initialLastVisible);
 
   useEffect(() => {
     const loadProducts = async () => {
       setLoading(true);
       setError(null);
       try {
+        await addReview();
         const productData = await fetchProducts(page, search, category, sortBy, order, lastVisible.current);
-        setProducts(productData.products);
+        if (page === 1) {
+          setProducts(productData.products);
+        } else {
+          setProducts((prev) => [...prev, ...productData.products]);
+        }
         lastVisible.current = productData.lastVisible;
         console.log('Fetched Products:', productData.products);
       } catch (err) {
@@ -181,14 +187,14 @@ export default function ProductListing({ initialProducts, initialPage }) {
 
 export async function getServerSideProps(context) {
   try {
-    const page = 1;
+    const page = context.query.page || 1;
     const search = context.query.search || '';
     const category = context.query.category || '';
     const sortBy = context.query.sortBy || '';
     const order = context.query.order || '';
     const productsData = await fetchProducts(page, search, category, sortBy, order);
-    return { props: { initialProducts: productsData.products, initialPage: page, lastVisible: productsData.lastVisible } };
+    return { props: { initialProducts: productsData.products, initialPage: page, initialLastVisible: productsData.lastVisible || null } };
   } catch (error) {
-    return { props: { error: "Products have failed to load, try again." } };
+    return { props: { initialProducts: [], initialPage: 1, initialLastVisible: null, error: "Products have failed to load, try again." } };
   }
 }
