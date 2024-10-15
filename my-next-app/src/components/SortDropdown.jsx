@@ -2,19 +2,21 @@ import { useRouter } from 'next/router';
 
 const SortDropdown = () => {
   const router = useRouter();
-  const { sortBy } = router.query;
+  const { sortBy, order } = router.query;
 
   const handleSortChange = (e) => {
-    router.push(`/?sortBy=${e.target.value}`);
+    const [sortField, sortOrder] = e.target.value.split(':');
+    router.push(`/?sortBy=${sortField}&order=${sortOrder}`);
   };
 
   return (
     <div className="sort-dropdown">
-      <select value={sortBy || ''} onChange={handleSortChange} className="dropdown">
+      <select value={`${sortBy}:${order}` || ''} onChange={handleSortChange} className="dropdown">
         <option value="">Sort By</option>
-        <option value="asc">Price: Low to High</option>
-        <option value="desc">Price: High to Low</option>
-        <option value="rating">Rating</option>
+        <option value="price:asc">Price: Low to High</option>
+        <option value="price:desc">Price: High to Low</option>
+        <option value="rating:asc">Rating: Low to High</option>
+        <option value="rating:desc">Rating: High to Low</option>
       </select>
       <style jsx>{`
         .sort-dropdown {
@@ -22,7 +24,6 @@ const SortDropdown = () => {
           justify-content: center;
           margin-bottom: 20px;
         }
-
         .dropdown {
           padding: 10px;
           font-size: 1rem;
@@ -32,7 +33,6 @@ const SortDropdown = () => {
           cursor: pointer;
           transition: border-color 0.3s ease;
         }
-
         .dropdown:hover {
           border-color: #e5c600;
         }
