@@ -7,18 +7,15 @@ const AuthStateListener = ({ setUser }) => {
     const auth = getAuth(app);
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-       
         setUser(user);
       } else {
-       
         setUser(null);
       }
     });
-
     return () => unsubscribe();
   }, [setUser]);
 
   return null;
 };
 
-export default AuthStateListener
+export default AuthStateListener;

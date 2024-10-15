@@ -1,0 +1,20 @@
+{
+    "short_name": "MaccyEComm",
+    "name": "Maccy's E-Commerce Store",
+    "icons": [
+      {
+        "src": "/icons/shopping-cart.png",
+        "type": "image/png",
+        "sizes": "192x192"
+      }
+    ],
+    "start_url": "/",
+    "background_color": "#ffffff",
+    "display": "standalone",
+    "theme_color": "#0070f3",
+    "description": "Shop the best products online at Maccy's E-Commerce Store.",
+    "orientation": "portrait-primary",
+    "scope": "/",
+    "lang": "en-US"
+  }
+  

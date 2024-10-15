@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 
 const SubmitReview = ({ productId, existingReview = null }) => {
@@ -12,6 +12,12 @@ const SubmitReview = ({ productId, existingReview = null }) => {
 
   const [review, setReview] = useState(initialReview);
   const router = useRouter();
+
+  useEffect(() => {
+    if (existingReview) {
+      setReview(existingReview);
+    }
+  }, [existingReview]);
 
   const handleChange = (e) => {
     setReview({ ...review, [e.target.name]: e.target.value });

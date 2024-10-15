@@ -1,49 +1,53 @@
-import Head from "next/head";
-import Image from "next/image";
-import { fetchProductById } from "../api/api";
-import SubmitReview from "@/components/SubmitReview";
-import AuthStateListener from "@/components/AuthStateListener";
-
-/**
- * Detailed product page component.
- * @param {Object} props - Component props.
- * @param {Object} props.product - Product details.
- * @param {string} props.product.title - Product title.
- * @param {string} props.product.description - Product description.
- * @param {number} props.product.price - Product price.
- * @param {string} props.product.category - Product category.
- * @param {Array} props.product.images - Product images.
- * @param {Array} props.product.tags - Product tags.
- * @param {number} props.product.rating - Product rating.
- * @param {number} props.product.stock - Product stock status.
- * @param {Array} props.product.reviews - Product reviews.
- * @param {string} props.error - Error message, if any.
- * @returns {JSX.Element} The detailed product page.
- */
+import { useState } from 'react';
+import { useRouter } from 'next/router';
+import Head from 'next/head';
+import Image from 'next/image';
+import SubmitReview from '@/components/SubmitReview';
+import { fetchProductById } from '../api/api';
 
 const DetailedProducts = ({ product, error }) => {
+  const [lastTap, setLastTap] = useState(null);
+  const router = useRouter();
+
+  const handleDoubleTap = async (review) => {
+    const now = Date.now();
+    if (lastTap && (now - lastTap) < 300) {
+      try {
+        const response = await fetch('/api/deleteReview', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ productId: product.id, review }),
+        });
+        const data = await response.json();
+        if (response.ok) {
+          alert(data.message);
+          router.reload();
+        } else {
+          throw new Error(data.message);
+        }
+      } catch (error) {
+        console.error('Error deleting review: ', error);
+        alert('Failed to delete review');
+      }
+    }
+    setLastTap(now);
+  };
+
   if (error) return <div className="error">{error}</div>;
 
   const sortedReviews = product.reviews.sort(
     (a, b) => new Date(b.date) - new Date(a.date)
   );
 
-  const goBack = ()=>{
-   
+  const goBack = () => {
     window.history.back();
-  
   };
-
 
   return (
     <>
-      <button
-        onClick={goBack}
-        className="Return-but bg-red-900"
-      >
+      <button onClick={goBack} className="Return-but bg-red-900">
         Return
       </button>
-
       <Head>
         <title>{product.title}</title>
         <meta name="description" content={product.description} />
@@ -77,16 +81,16 @@ const DetailedProducts = ({ product, error }) => {
           </p>
           <div className="reviews">
             <h2>Reviews</h2>
-            <SubmitReview productId={product.id} />
             {sortedReviews.length > 0 ? (
               <div className="review-container">
                 {sortedReviews.map((review) => (
                   <div
                     key={`${review.reviewerEmail}-${review.date}`}
                     className="review"
+                    onClick={() => handleDoubleTap(review)}
                   >
                     <p>
-                      <strong>{review.name}</strong> Date:{" "}
+                      <strong>{review.reviewerName}</strong> Date:{" "}
                       {new Date(review.date).toLocaleDateString("en-US")}
                     </p>
                     <p>Rated: {review.rating}/5</p>
@@ -98,11 +102,11 @@ const DetailedProducts = ({ product, error }) => {
               <p>No reviews yet</p>
             )}
           </div>
+          <SubmitReview productId={product.id} />
         </div>
       </div>
       <style jsx>{`
         @import url("https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap");
-
         .product-detail-container {
           font-family: Roboto, sans-serif;
           display: flex;
@@ -114,50 +118,42 @@ const DetailedProducts = ({ product, error }) => {
           background-color: #f5f5f5;
           border-radius: 8px;
         }
-
         .product-image {
           flex: 1;
           max-width: 400px;
           position: relative;
         }
-
         .product-info {
           flex: 2;
           padding: 20px;
         }
-
         h1 {
           font-size: 2.5rem;
           margin-bottom: 15px;
           color: #333;
         }
-
         .price {
           font-size: 1.8rem;
           font-weight: bold;
           color: #f5d700;
           margin-bottom: 10px;
         }
-
         .category {
           font-size: 1.2rem;
           color: #7f8c8d;
           margin-bottom: 15px;
         }
-
         .description {
           font-size: 1.1rem;
           line-height: 1.5;
           margin-bottom: 20px;
           color: #555;
         }
-
         .tags {
           display: flex;
           flex-wrap: wrap;
           gap: 5px;
         }
-
         .tag {
           background-color: #f5f5f5;
           border: 1px solid #f5d700;
@@ -166,29 +162,24 @@ const DetailedProducts = ({ product, error }) => {
           font-size: 0.9rem;
           margin-bottom: 5px;
         }
-
         .rating {
           display: flex;
           align-items: center;
           margin-bottom: 10px;
         }
-
         .rating-star {
           color: #f5d700;
           font-size: 1.2rem;
         }
-
         .stock {
           font-size: 1.2rem;
           font-weight: bold;
           color: #f5d700;
           margin-bottom: 15px;
         }
-
         .reviews {
           margin-top: 20px;
         }
-
         .review {
           border-top: 1px solid #e1e1e1;
           padding: 10px;
@@ -198,22 +189,18 @@ const DetailedProducts = ({ product, error }) => {
           border-radius: 8px;
           color: #fff;
         }
-
         .review p {
           font-weight: bold;
         }
-
         .error {
           color: #e74c3c;
           font-weight: bold;
         }
-
         @media (max-width: 768px) {
           .product-detail-container {
             flex-direction: column;
             align-items: center;
           }
-
           .product-image {
             max-width: 100%;
           }
@@ -223,16 +210,8 @@ const DetailedProducts = ({ product, error }) => {
   );
 };
 
-/**
- * Fetches product details for server-side rendering.
- * @param {Object} context - Next.js context object.
- * @param {Object} context.params - Route parameters.
- * @param {string} context.params.id - Product ID.
- * @returns {Object} Props for the component.
- */
 export async function getServerSideProps(context) {
   const { id } = context.params;
-
   try {
     const product = await fetchProductById(id);
     return { props: { product } };
