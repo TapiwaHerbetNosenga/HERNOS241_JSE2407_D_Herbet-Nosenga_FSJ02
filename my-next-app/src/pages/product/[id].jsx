@@ -1,6 +1,6 @@
-import Head from 'next/head';
-import Image from 'next/image';
-import { fetchProductById } from '../../api/api';
+import Head from "next/head";
+import Image from "next/image";
+import { fetchProductById } from "../../api/api";
 
 /**
  * Detailed product page component.
@@ -18,13 +18,30 @@ import { fetchProductById } from '../../api/api';
  * @param {string} props.error - Error message, if any.
  * @returns {JSX.Element} The detailed product page.
  */
+
 const DetailedProducts = ({ product, error }) => {
   if (error) return <div className="error">{error}</div>;
 
-  const sortedReviews = product.reviews.sort((a, b) => new Date(b.date) - new Date(a.date));
+  const sortedReviews = product.reviews.sort(
+    (a, b) => new Date(b.date) - new Date(a.date)
+  );
+
+  const goBack = ()=>{
+   
+    window.history.back();
+  
+  };
+
 
   return (
     <>
+      <button
+        onClick={goBack}
+        className="Return-but bg-red-900"
+      >
+        Return
+      </button>
+
       <Head>
         <title>{product.title}</title>
         <meta name="description" content={product.description} />
@@ -34,14 +51,14 @@ const DetailedProducts = ({ product, error }) => {
       </Head>
       <div className="product-detail-container">
         <div className="product-image">
-          <Image 
-            src={product.images[0]} 
-            alt={product.title} 
-            width={400} 
-            height={400} 
-            layout="responsive" 
-            objectFit="cover" 
-            quality={75} 
+          <Image
+            src={product.images[0]}
+            alt={product.title}
+            width={400}
+            height={400}
+            layout="responsive"
+            objectFit="cover"
+            quality={75}
           />
         </div>
         <div className="product-info">
@@ -50,20 +67,24 @@ const DetailedProducts = ({ product, error }) => {
           <p className="category">{product.category}</p>
           <p className="description">{product.description}</p>
           {product.tags && (
-            <p className="tags">Tags: {product.tags.join(', ')}</p>
+            <p className="tags">Tags: {product.tags.join(", ")}</p>
           )}
           <p className="rating">Rating: {product.rating} / 5</p>
           <p className="stock">
-            {product.stock > 0 ? 'In Stock' : 'Out of Stock'}
+            {product.stock > 0 ? "In Stock" : "Out of Stock"}
           </p>
           <div className="reviews">
             <h2>Reviews</h2>
             {sortedReviews.length > 0 ? (
               <div className="review-container">
                 {sortedReviews.map((review) => (
-                  <div key={`${review.reviewerEmail}-${review.date}`} className="review">
+                  <div
+                    key={`${review.reviewerEmail}-${review.date}`}
+                    className="review"
+                  >
                     <p>
-                      <strong>{review.name}</strong> Date: {new Date(review.date).toLocaleDateString('en-US')}
+                      <strong>{review.name}</strong> Date:{" "}
+                      {new Date(review.date).toLocaleDateString("en-US")}
                     </p>
                     <p>Rated: {review.rating}/5</p>
                     <p>Comment: {review.comment}</p>
@@ -77,7 +98,7 @@ const DetailedProducts = ({ product, error }) => {
         </div>
       </div>
       <style jsx>{`
-        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+        @import url("https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap");
 
         .product-detail-container {
           font-family: Roboto, sans-serif;
@@ -87,7 +108,7 @@ const DetailedProducts = ({ product, error }) => {
           padding: 20px;
           max-width: 1200px;
           margin: auto;
-          background-color: #F5F5F5;
+          background-color: #f5f5f5;
           border-radius: 8px;
         }
 
@@ -135,7 +156,7 @@ const DetailedProducts = ({ product, error }) => {
         }
 
         .tag {
-          background-color: #F5F5F5;
+          background-color: #f5f5f5;
           border: 1px solid #f5d700;
           padding: 5px 10px;
           border-radius: 4px;
@@ -170,7 +191,7 @@ const DetailedProducts = ({ product, error }) => {
           padding: 10px;
           margin-top: 10px;
           width: 100%;
-          background-color: #FFC107;
+          background-color: #ffc107;
           border-radius: 8px;
           color: #fff;
         }
