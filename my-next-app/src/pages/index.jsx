@@ -80,7 +80,7 @@ export default function ProductListing({
         <h1 className="title">Maccy's E-Commerce Store</h1>
        {user ?(
         <>
-        <Link href={"auth/sign-out"}> <h2>Sign out</h2></Link>
+        <Link href={"auth/sign-out"}> <h2 className="text-lg font-bold text-white bg-red-500 hover:bg-red-700 transition-colors px-4 py-2 rounded">Sign out</h2></Link>
        
        
        </>) : (

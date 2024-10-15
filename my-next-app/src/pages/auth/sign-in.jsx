@@ -3,9 +3,13 @@ import SignInForm from "@/components/SignIn";
 
 const SignIn = () => {
   return (
-    <div>
-      <h1>Sign In</h1>
-      <SignInForm />
+    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", backgroundColor: "#f7fafc" }}>
+      <div style={{ backgroundColor: "#fff", padding: "2rem", borderRadius: "0.5rem", boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)", width: "100%", maxWidth: "28rem" }}>
+        <h1 style={{ fontSize: "1.75rem", fontWeight: "700", marginBottom: "1.5rem", textAlign: "center", color: "#4a5568" }}>
+          Sign In
+        </h1>
+        <SignInForm />
+      </div>
     </div>
   );
 };
