@@ -69,6 +69,10 @@ Welcome to **Maccy's E-Commerce Store**! This is a web application des
 
 Find the code repository on GitHub [here](https://github.com/TapiwaHerbetNosenga/HERNOS241_JSE2407_D_Herbet-Nosenga_FSJ03).
 
+## My Hosted Website
+
+This is my hosted site [here](https://fsj-3.vercel.app/)
+
 
 ## Usage Examples
 
