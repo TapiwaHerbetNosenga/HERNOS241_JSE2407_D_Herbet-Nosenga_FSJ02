@@ -1,12 +1,24 @@
-import { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/router';
-import { fetchProducts, fetchProductsBySearch, fetchProductsByCategory, fetchProductsBySort, addReview } from '../api/api';
-import ProductList from '../components/ProductList';
-import SearchBar from '../components/SearchBar';
-import CategoryDropdown from '../components/CategoryDropdown';
-import SortDropdown from '../components/SortDropdown';
+import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/router";
+import {
+  fetchProducts,
+  fetchProductsBySearch,
+  fetchProductsByCategory,
+  fetchProductsBySort,
+  addReview,
+} from "../api/api";
+import ProductList from "../components/ProductList";
+import SearchBar from "../components/SearchBar";
+import CategoryDropdown from "../components/CategoryDropdown";
+import SortDropdown from "../components/SortDropdown";
+import AuthStateListener from "@/components/AuthStateListener";
+import Link from "next/link";
 
-export default function ProductListing({ initialProducts = [], initialPage = 1, initialLastVisible = null }) {
+export default function ProductListing({
+  initialProducts = [],
+  initialPage = 1,
+  initialLastVisible = null,
+}) {
   const [products, setProducts] = useState(initialProducts);
   const [page, setPage] = useState(initialPage);
   const [loading, setLoading] = useState(false);
@@ -14,6 +26,7 @@ export default function ProductListing({ initialProducts = [], initialPage = 1, 
   const router = useRouter();
   const { search, category, sortBy, order } = router.query;
   const lastVisible = useRef(initialLastVisible);
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     const loadProducts = async () => {
@@ -33,10 +46,10 @@ export default function ProductListing({ initialProducts = [], initialPage = 1, 
         }
         setProducts(productData.products);
         lastVisible.current = productData.lastVisible;
-        console.log('Fetched Products:', productData.products);
+        console.log("Fetched Products:", productData.products);
       } catch (err) {
         setError("Failed to load products");
-        console.error('Error:', err);
+        console.error("Error:", err);
       } finally {
         setLoading(false);
       }
@@ -57,17 +70,37 @@ export default function ProductListing({ initialProducts = [], initialPage = 1, 
   };
 
   const handleReset = () => {
-    router.push('/');
+    router.push("/");
   };
 
   return (
     <div className="container flex-center">
-      <h1 className="title">Maccy's E-Commerce Store</h1>
+      <AuthStateListener setUser={setUser}></AuthStateListener>
+      <div className="flex flex-row">
+        <h1 className="title">Maccy's E-Commerce Store</h1>
+       {user ?(
+        <>
+        <Link href={"auth/sign-out"}> <h2>Sign out</h2></Link>
+       
+       
+       </>) : (
+        <>
+         <Link href={"auth/sign-in"}>
+          <h2>Sign In</h2>
+        </Link>
+        <Link href={"auth/auth"}>
+          <h2>Sign Up</h2>
+        </Link>
+        </>
+       )}
+      </div>
       <SearchBar />
       <CategoryDropdown />
       <SortDropdown />
       <div className="reset-container">
-        <button className="reset-btn" onClick={handleReset}>Reset Filters</button>
+        <button className="reset-btn" onClick={handleReset}>
+          Reset Filters
+        </button>
       </div>
       {error ? (
         <div className="error-message">{error}</div>
@@ -79,7 +112,11 @@ export default function ProductListing({ initialProducts = [], initialPage = 1, 
             <ProductList products={products} />
           </div>
           <div className="pagination">
-            <button className="btn" onClick={handlePrevPage} disabled={page === 1}>
+            <button
+              className="btn"
+              onClick={handlePrevPage}
+              disabled={page === 1}
+            >
               ← Previous
             </button>
             <span className="page-number">Page {page}</span>
@@ -99,7 +136,7 @@ export default function ProductListing({ initialProducts = [], initialPage = 1, 
         .title {
           text-align: center;
           margin-bottom: 20px;
-          font-family: 'Roboto', sans-serif;
+          font-family: "Roboto", sans-serif;
           font-size: 2.5rem;
           font-weight: bold;
           color: #0070f3;
@@ -154,7 +191,7 @@ export default function ProductListing({ initialProducts = [], initialPage = 1, 
           text-align: center;
           margin-top: 50px;
           font-size: 1.5rem;
-          color: #F5D700;
+          color: #f5d700;
         }
         @media (max-width: 1200px) {
           .product-grid {
@@ -179,10 +216,10 @@ export default function ProductListing({ initialProducts = [], initialPage = 1, 
 export async function getServerSideProps(context) {
   try {
     const page = context.query.page || 1;
-    const search = context.query.search || '';
-    const category = context.query.category || '';
-    const sortBy = context.query.sortBy || '';
-    const order = context.query.order || '';
+    const search = context.query.search || "";
+    const category = context.query.category || "";
+    const sortBy = context.query.sortBy || "";
+    const order = context.query.order || "";
     let productsData;
     if (search) {
       productsData = await fetchProductsBySearch(search, page);
@@ -193,8 +230,21 @@ export async function getServerSideProps(context) {
     } else {
       productsData = await fetchProducts(page);
     }
-    return { props: { initialProducts: productsData.products, initialPage: page, initialLastVisible: productsData.lastVisible || null } };
+    return {
+      props: {
+        initialProducts: productsData.products,
+        initialPage: page,
+        initialLastVisible: productsData.lastVisible || null,
+      },
+    };
   } catch (error) {
-    return { props: { initialProducts: [], initialPage: 1, initialLastVisible: null, error: "Products have failed to load, try again." } };
+    return {
+      props: {
+        initialProducts: [],
+        initialPage: 1,
+        initialLastVisible: null,
+        error: "Products have failed to load, try again.",
+      },
+    };
   }
 }

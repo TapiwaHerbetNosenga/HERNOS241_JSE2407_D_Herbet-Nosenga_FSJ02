@@ -1,6 +1,7 @@
 import Head from "next/head";
 import Image from "next/image";
 import { fetchProductById } from "../../api/api";
+import AuthStateListener from "@/components/AuthStateListener";
 
 /**
  * Detailed product page component.
