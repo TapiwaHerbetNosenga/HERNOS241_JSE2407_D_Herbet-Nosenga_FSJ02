@@ -6,7 +6,7 @@ import {
   fetchProductsByCategory,
   fetchProductsBySort,
   addReview,
-} from "../api/api";
+} from "./api/api";
 import ProductList from "../components/ProductList";
 import SearchBar from "../components/SearchBar";
 import CategoryDropdown from "../components/CategoryDropdown";

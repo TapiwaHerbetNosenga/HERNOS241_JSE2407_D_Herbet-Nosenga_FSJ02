@@ -1,6 +1,7 @@
 import Head from "next/head";
 import Image from "next/image";
-import { fetchProductById } from "../../api/api";
+import { fetchProductById } from "../api/api";
+import SubmitReview from "@/components/SubmitReview";
 import AuthStateListener from "@/components/AuthStateListener";
 
 /**
@@ -76,6 +77,7 @@ const DetailedProducts = ({ product, error }) => {
           </p>
           <div className="reviews">
             <h2>Reviews</h2>
+            <SubmitReview productId={product.id} />
             {sortedReviews.length > 0 ? (
               <div className="review-container">
                 {sortedReviews.map((review) => (

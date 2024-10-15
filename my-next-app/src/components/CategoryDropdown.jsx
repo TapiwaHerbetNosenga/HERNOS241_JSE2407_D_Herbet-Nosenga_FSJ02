@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
-import { fetchCategories } from '../api/api';
+import { fetchCategories } from '../pages/api/api';
 
 const CategoryDropdown = () => {
   const router = useRouter();
