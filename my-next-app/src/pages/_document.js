@@ -7,7 +7,7 @@ class MyDocument extends Document {
         <Head>
           <link rel="manifest" href="/manifest.json" />
           <meta name="theme-color" content="#0070f3" />
-          <link rel="icon" href="/favicon.ico" />
+          <link rel="icon" href="/grocery-store.png" />
           <link rel="apple-touch-icon" href="/icons/shopping-cart.png" />
         </Head>
         <body>
